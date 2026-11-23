@@ -17,6 +17,20 @@ Wokwi simula ESP32 y Arduino Nano. **No simula Bluetooth ni el módulo LoRa**: e
      `/plugin marketplace add wokwi/skills` y `/plugin install wokwi@wokwi-skills`.
 4. Correr: `pio run -e collar_sim` y luego
    `wokwi-cli firmware/wokwi/collar --scenario scenarios/boot_and_telemetry.test.yaml --timeout 60000`.
+5. **Las dos placas juntas sin VS Code** (verificado el 2026-11-23): `wokwi-cli` también abre el
+   puerto RFC2217 de cada `wokwi.toml` (collar `:4000`, unidad `:4001`), así que alcanza con
+   `wokwi-cli firmware/wokwi/unit --timeout 300000 &`, lo mismo con `collar`, y el puente de la
+   opción B. Es lo que usa la demo de punta a punta ([07-demo.md](07-demo.md)).
+
+**Límites del plan gratis** (vistos el 2026-11-23): cada simulación por CLI se corta a los
+**5 minutos**, y hay una **cuota mensual de minutos de CI** (al agotarse: `API Error: You have used
+up your Free plan monthly CI minute quota`). Si pasa, usar la opción B. El puente termina sin error
+cuando una simulación se corta.
+
+**Latencia**: las dos simulaciones corren en servidores de Wokwi y se hablan a través de nuestra
+PC, y la ida y vuelta supera la ventana de escucha de 500 ms del collar en ahorro. Por eso
+`collar_sim` usa `RX_WINDOW_MS=3000`; `collar_lora` y `collar_sim_interop` mantienen los 500 ms
+del acuerdo.
 
 ### B. Extensión "Wokwi for VS Code" (visual, para ver el circuito y conectar las dos placas)
 - Comando "Wokwi: Select Config File" → `firmware/wokwi/collar/wokwi.toml` (o `unit/`).
@@ -27,6 +41,8 @@ Wokwi simula ESP32 y Arduino Nano. **No simula Bluetooth ni el módulo LoRa**: e
 - Con una sola placa, el bridge hace de par virtual (`--collar ...` = unidad virtual,
   `--unit ...` = collar virtual). Comandos de consola: `find 10`, `ahorro`, `normal`,
   `chaos loss=0.2 dup=0.1 corrupt=0.05`.
+- Con `--cloud --pair-code <código> --uid <MAC de prueba>` el puente además hace de celular con
+  la app Ovenbird Smart (empareja, sube los datos y entrega los comandos de la nube).
 
 ### C. wokwi.com (entregable: "enlace al proyecto de Wokwi")
 - `python firmware/tools/export_wokwi_web.py collar` (y `unit`) arma una carpeta plana en

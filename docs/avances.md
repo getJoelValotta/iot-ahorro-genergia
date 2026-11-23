@@ -183,3 +183,39 @@ Sesión de preguntas y decisiones (sin código). Todo lo decidido, con sus motiv
 - Demo de corrupción (`chaos corrupt=...`) sin muestra suficiente (cuota agotada).
 - `docs/07-demo.md`, README final y checklist de pruebas cruzadas (tickets 10-11), revisión visual del front,
   code review, deploy (Vercel/Supabase nube, fuera de esta sesión).
+
+## Sesión 5 — 2026-11-23: guion de demo, README final y pruebas cruzadas (tickets 10-11)
+
+- **CI de GitHub Actions en verde** para el commit `e18f168` (firmware, backend y frontend).
+- **Revisión en el navegador** (Chrome, escritorio) del recorrido completo contra back, Supabase y
+  Ovenbird reales en local: registro → mascota → código → unidad emparejada con el "celular falso"
+  (UID de prueba `02:47:31:00:00:02`, sin Wokwi) → vincular → "Batería y ahorro" (72 %, ~18 h / ~7,1 días)
+  → Ahorro: "Enviando…" → ACK desde el script → "Aplicado en el collar" → mapa con la mascota, en
+  línea y con batería. Sin errores en la consola. **No se revisó en tamaño celular** (no se pudo
+  achicar la ventana).
+- Dato nuevo: re-emparejar el mismo `uid` con otro código **conserva el `deviceId`** en Ovenbird.
+- **Wokwi**: la cuota mensual de CI sigue agotada, así que la demo de corrupción en vivo quedó
+  pendiente. Está cubierta por los tests nativos de CRC y resincronización.
+- Documentos nuevos:
+  - `docs/07-demo.md`: guion paso a paso con el equivalente en hardware real, la tabla de
+    robustez y los problemas conocidos.
+  - `docs/08-pruebas-cruzadas.md`: checklist de clase.
+  - `supabase/README.md`.
+- Documentos actualizados:
+  - **README único** con todo lo que pide la consigna.
+  - `docs/03`: sección "Modelo de consumo" con fuentes y supuestos.
+  - `docs/04`: RFC2217 por CLI, límites del plan gratis y latencia.
+  - `docs/06`: puertos de Supabase, autonomía real y formatos de Ovenbird.
+  - `docs/PLAN.md` y los tickets de `.scratch` (01-09 terminados; 10-11 con lo que queda para el equipo).
+- Datos de prueba que quedaron:
+  - en la base local, el usuario `demo-ui@example.test` con la mascota "Firulais";
+  - en Ovenbird, la unidad "OB-0002 (prueba UI)", en modo ahorro.
+
+### Pendiente
+- Deploy en Vercel + Supabase en la nube, y links en el README.
+- Publicar los proyectos en wokwi.com.
+- Demo de corrupción en vivo (VS Code o cuando vuelva la cuota).
+- Revisar el front en un celular.
+- Placas reales y app Ovenbird Smart.
+- Pruebas cruzadas en clase.
+- Rotar los secretos antes de la entrega.

@@ -31,6 +31,10 @@ El "celular falso" usa los mismos endpoints públicos que usa la app (relevados 
 | Recibir comandos (ej. activar ahorro) | `GET /v1/bridge/commands?wait=...` (long-poll) → `>ble <hex>` a la unidad | Bearer |
 | Confirmar comando con el `COMMAND_ACK` de la unidad | `POST /v1/bridge/commands/{id}/ack { result: "ok"|"error" }` | Bearer |
 
+Formatos reales (relevados contra la plataforma): `ts` en **segundos** Unix; los comandos llegan como
+`{ items: [{ commandId, deviceId, dps, status }] }`. Re-emparejar el mismo `uid` con un código nuevo
+conserva el mismo `deviceId`.
+
 El jueves se reemplaza el script por el celular y `*_sim` por `*_lora`; lo único que no se prueba
 en simulación es la capa física de radio y BLE.
 
@@ -51,7 +55,7 @@ en simulación es la capa física de radio y BLE.
 | Prueba E2E Wokwi | `radiosim_bridge.py` suma el modo "celular" (módulo aparte `ble_cloud.py` con pytest). | Un puerto serie de Wokwi se abre una sola vez; un solo proceso maneja todo. |
 | Verificación | (a) Jest + supertest sobre el back con el SDK simulado, más `pio test -e native` y pytest, en GitHub Actions. (b) Guion manual de la demo con Wokwi en `docs/07-demo.md`. | La consigna pide pruebas de funciones críticas y un modo de verificar de punta a punta. |
 | Git | Todo directo a `main`, un commit por parte terminada. | Decisión del equipo (plazo corto). |
-| Puertos locales | Back `3001`, front `3000`, Supabase local `54321` (API) / `54322` (Postgres). | Coincide con los ejemplos de `docs/01`. |
+| Puertos locales | Back `3001`, front `3000`, Supabase local `54331` (API) / `54332` (Postgres). | Back y front coinciden con `docs/01`. Supabase se corrió 10 puertos para convivir con otros proyectos de Supabase en la misma PC (`supabase/config.toml`). |
 
 ## 3. Compatibilidad con otros grupos
 
@@ -119,8 +123,8 @@ Rutas (marcadas `x-variant: power-saving` en Swagger; `power-saving` en `/capabi
 El modelo de consumo es una **función pura** en el back (`power-model.ts`, con test). Usa las
 corrientes de datasheet de ATmega328P, SX1278 y NEO-6M, el tiempo en el aire de la trama
 (SF7/BW125) y la ventana RX, según [03-variante-ahorro-energia.md](03-variante-ahorro-energia.md).
-Orden de magnitud esperado con 1000 mAh: ~13 h en normal y ~2–3 días en ahorro (el número final
-sale del modelo).
+Resultado del modelo con 1000 mAh: **≈ 57 mA → ≈ 18 h** en normal y **≈ 5,9 mA → ≈ 7 días** en
+ahorro (la primera estimación a mano era ~13 h y ~2–3 días).
 
 ## 5. Base de datos (primera migración)
 
@@ -142,7 +146,7 @@ queda activado sin políticas: solo entra la clave de servicio del back.
 
 **`frontend/.env.local`**: `NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1`,
 `NEXT_PUBLIC_OVENBIRD_URL=https://iotplatform.ovenbirdconsulting.com.ar`, `API_URL` (opcional,
-pisa a la anterior en el servidor).
+pisa a la anterior en el servidor), `COOKIE_SECURE` (opcional, fuerza `Secure` en la cookie).
 
 **Script Wokwi** (`firmware/tools`): `OVENBIRD_URL`; el código de emparejamiento y el UID de
 prueba van por parámetro (`--pair-code`, `--uid`).
