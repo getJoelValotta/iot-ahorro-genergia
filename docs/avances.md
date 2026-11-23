@@ -231,3 +231,24 @@ Sesión de preguntas y decisiones (sin código). Todo lo decidido, con sus motiv
 - Placas reales y app Ovenbird Smart.
 - Pruebas cruzadas en clase.
 - Rotar los secretos antes de la entrega.
+
+## Sesión 5 (cont.) — 2026-11-23: guía de pruebas en PDF y unidad de prueba
+
+- **`docs/guia-de-pruebas.pdf`** (16 páginas, para el equipo, sin tecnicismos):
+  - preparar la PC y configurar las claves sin exponerlas;
+  - tests automáticos y cómo levantar todo;
+  - los cuatro niveles de prueba: tests, página + unidad de prueba, Wokwi y placas reales;
+  - pruebas de fallas, pruebas con otros grupos, problemas frecuentes, checklist de demo y glosario.
+
+  Se genera con `python scripts/guia_pruebas_pdf.py` (requiere `pip install reportlab`).
+- **`firmware/tools/unidad_prueba.py`** (+4 tests pytest, 36 en total): unidad + collar virtuales
+  directo contra Ovenbird, para probar la web sin placas ni minutos de Wokwi. Probado en vivo con el
+  backend local:
+  - emparejar, aparecer en "Tus dispositivos", vincular;
+  - Normal confirmado en ~5 s;
+  - `--no-responder` → `failed` ("El collar no respondió").
+
+  Arreglado durante la prueba: confirma el comando antes de escribir el log, y una consola de
+  Windows sin UTF-8 ya no corta el programa.
+- Dato nuevo: si una ejecución recibe un comando y se corta antes de confirmarlo, Ovenbird no lo
+  vuelve a entregar. Queda pendiente y pasa a "no respondió" al vencer (10 min).

@@ -49,7 +49,7 @@ Comprobación rápida: `http://localhost:3001/api/v1/capabilities` devuelve
 | 4 | Encender las dos placas simuladas y el puente con el código (ver §3). | En la consola del puente: `unidad emparejada en Ovenbird: deviceId=...` y luego los reportes. | Encender collar y unidad; en la app **Ovenbird Smart** → *Agregar dispositivo* → elegir `OB-xxxx` → ingresar el código. |
 | 5 | En **Emparejar** (o en la ficha de la mascota) aparece la unidad. Entrar a la ficha → elegir la unidad → **Vincular**. | "En línea", "Visto recién", y aparece la tarjeta **Batería y ahorro** con la batería y la autonomía de cada modo. | Igual. |
 | 6 | Menú **Mapa**. | La mascota en el mapa (ruta pregrabada de Mar del Plata) con estado y batería. Tocarla la centra. | Posición real del GPS (puede tardar en tener fix bajo techo). |
-| 7 | En la ficha, interruptor **Normal → Ahorro**. | "Enviando…" y, unos segundos después, **"Aplicado en el collar"**. El collar pasa a reportar cada 150 s con `ahorro=1`. | Igual; el celular tiene que estar cerca de la unidad (BLE). |
+| 7 | En la ficha, interruptor **Normal → Ahorro**. | "Enviando…" y, unos segundos después, **"Aplicado en el collar"**. El collar pasa a reportar cada 150 s (en el puente, las líneas `TEL` dicen `[AHORRO] ... g1_modo=ahorro I=150s`). | Igual; el celular tiene que estar cerca de la unidad (BLE). |
 | 8 | Interruptor **Ahorro → Normal**. | "Enviando…" hasta la próxima ventana del collar (**hasta ~150 s**, porque en ahorro el collar solo escucha después de cada reporte) y luego "Aplicado en el collar". | Igual. |
 
 Qué decir en el paso 7–8: en ahorro el collar apaga el GPS entre reportes y duerme la radio, pero
@@ -83,6 +83,14 @@ python tools/radiosim_bridge.py \
 
 Consola del puente (útil en la demo): `find 10` (hace sonar el collar), `ahorro` / `normal`
 (simulan el cambio desde la app), `chaos ...` (fallas, ver §4), `quit`.
+
+### Sin placas ni Wokwi: unidad de prueba
+
+Si no hay cuota de Wokwi, el paso 4 se puede hacer con
+`python firmware/tools/unidad_prueba.py --pair-code ABC-123`. El script empareja una unidad de
+prueba y sube posiciones que dan vueltas por Mar del Plata, además de la batería. También confirma
+los cambios de modo; con `--no-responder` los rechaza. Sirve para mostrar toda la parte web, pero
+no el firmware. Guía completa para el equipo: [guia-de-pruebas.pdf](guia-de-pruebas.pdf).
 
 ## 4. Robustez
 

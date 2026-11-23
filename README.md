@@ -142,6 +142,11 @@ python tools/radiosim_bridge.py --collar rfc2217://localhost:4000 --unit rfc2217
 ```
 Más opciones (VS Code, wokwi.com) en [docs/04-wokwi.md](docs/04-wokwi.md).
 
+**Sin placas ni Wokwi**: `python firmware/tools/unidad_prueba.py --pair-code <código>` simula una unidad
+con su collar directo contra Ovenbird (posiciones, batería y respuesta a los cambios de modo;
+`--no-responder` para ver "El collar no respondió"). Paso a paso en la
+[guía de pruebas](docs/guia-de-pruebas.pdf).
+
 ## Variables de entorno (sin valores)
 
 Plantillas: `backend/.env.example` y `frontend/.env.example`. Los archivos reales (`.env`,
@@ -280,6 +285,7 @@ Checklist para probar en clase: **[docs/08-pruebas-cruzadas.md](docs/08-pruebas-
 | [docs/03-variante-ahorro-energia.md](docs/03-variante-ahorro-energia.md) | Diseño de la variante |
 | [docs/04-wokwi.md](docs/04-wokwi.md) | Simulación |
 | [docs/06-decisiones-arquitectura.md](docs/06-decisiones-arquitectura.md) | Decisiones y motivos |
+| [docs/guia-de-pruebas.pdf](docs/guia-de-pruebas.pdf) | **Guía de pruebas paso a paso para el equipo** (instalar, configurar, probar con y sin Wokwi, fallas, problemas frecuentes). Se regenera con `python scripts/guia_pruebas_pdf.py` |
 | [docs/07-demo.md](docs/07-demo.md) | Guion de la demo |
 | [docs/08-pruebas-cruzadas.md](docs/08-pruebas-cruzadas.md) | Checklist de pruebas con otros grupos |
 | [docs/PLAN.md](docs/PLAN.md) · [docs/avances.md](docs/avances.md) | Estado y registro de trabajo |
