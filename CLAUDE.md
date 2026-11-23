@@ -52,7 +52,7 @@ vendor/     tarballs del SDK de Ovenbird (descargados por setup, ignorados por g
 
 ### Issue tracker
 
-Issues y specs en GitHub Issues del repo (`gh` CLI). See `docs/agents/issue-tracker.md`.
+Issues y specs como markdown local en `.scratch/<feature>/` (spec en `spec.md`, tickets en `issues/NN-*.md`). See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
