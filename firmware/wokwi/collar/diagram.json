@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "author": "Grupo 1 - TP Final IoT",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-nano", "id": "nano", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-buzzer", "id": "bz1", "top": -120, "left": 40, "attrs": { "volume": "0.1" } },
+    { "type": "wokwi-led", "id": "led_find", "top": -110, "left": 140, "attrs": { "color": "blue", "label": "FIND_ME" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": -40, "left": 140, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "led_gps", "top": -110, "left": 200, "attrs": { "color": "green", "label": "GPS ON" } },
+    { "type": "wokwi-resistor", "id": "r2", "top": -40, "left": 200, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-potentiometer", "id": "bat", "top": 120, "left": 40, "attrs": { "value": "870" } }
+  ],
+  "connections": [
+    [ "bz1:2", "nano:5", "orange", [] ],
+    [ "bz1:1", "nano:GND.2", "black", [] ],
+    [ "led_find:A", "r1:1", "blue", [] ],
+    [ "r1:2", "nano:6", "blue", [] ],
+    [ "led_find:C", "nano:GND.2", "black", [] ],
+    [ "led_gps:A", "r2:1", "green", [] ],
+    [ "r2:2", "nano:7", "green", [] ],
+    [ "led_gps:C", "nano:GND.2", "black", [] ],
+    [ "bat:SIG", "nano:A0", "violet", [] ],
+    [ "bat:GND", "nano:GND.1", "black", [] ],
+    [ "bat:VCC", "nano:5V", "red", [] ]
+  ],
+  "serialMonitor": { "display": "auto" },
+  "dependencies": {}
+}

@@ -1,0 +1,18 @@
+# wokwi-cli firmware/wokwi/unit --scenario scenarios/boot_and_button.test.yaml --timeout 30000
+name: 'Unidad: arranque y FIND_ME desde botón (sin collar => queda encolado)'
+version: 1
+author: 'Grupo 1'
+steps:
+  - wait-serial: '# unidad vinculada a DEV_ID=0x101'
+  - wait-serial: '# BLE STATUS'
+  - set-control:
+      part-id: btn_find
+      control: pressed
+      value: 1
+  # El firmware reacciona al presionar: esperar la línea ANTES de soltar
+  # (wait-serial solo ve lo que llega después de empezar el paso).
+  - wait-serial: '# ble cmd op=1 arg=10'
+  - set-control:
+      part-id: btn_find
+      control: pressed
+      value: 0

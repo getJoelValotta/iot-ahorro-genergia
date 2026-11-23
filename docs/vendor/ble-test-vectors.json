@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "note": "Little-endian. Copia de https://iotplatform.ovenbirdconsulting.com.ar/descargas/ble-test-vectors.json (scripts/setup descarga el original).",
+  "cases": [
+    {
+      "id": "location-valid",
+      "characteristic": "LOCATION",
+      "hex": "28 d2 58 e9 30 b2 b3 dd 78 00 03 00 e0 b5 2f 67",
+      "fields": { "lat": -38.0055, "lon": -57.5426, "hdop": 1.2, "fix": 3, "ts": 1731180000 }
+    },
+    {
+      "id": "location-no-fix",
+      "characteristic": "LOCATION",
+      "hex": "00 00 00 00 00 00 00 00 ff ff 00 00 00 00 00 00",
+      "fields": { "lat": 0, "lon": 0, "hdop": null, "fix": 0, "ts": 0 }
+    },
+    {
+      "id": "status-normal",
+      "characteristic": "STATUS",
+      "hex": "57 a4 07 01 29 00 03 00",
+      "fields": { "battery_pct": 87, "link_rssi_dbm": -92, "link_snr_db": 7, "collar_online": true, "seq": 41, "age_s": 3 }
+    },
+    {
+      "id": "status-extreme",
+      "characteristic": "STATUS",
+      "hex": "ff 88 fb 00 ff ff ff ff",
+      "fields": { "battery_pct": null, "link_rssi_dbm": -120, "link_snr_db": -5, "collar_online": false, "seq": 65535, "age_s": 65535 }
+    },
+    {
+      "id": "command-find-me",
+      "characteristic": "COMMAND",
+      "hex": "07 00 01 0a 00",
+      "fields": { "cmd_id": 7, "opcode": 1, "arg": 10 }
+    },
+    {
+      "id": "command-ack-ok",
+      "characteristic": "COMMAND_ACK",
+      "hex": "07 00 00",
+      "fields": { "cmd_id": 7, "result": 0 }
+    }
+  ]
+}

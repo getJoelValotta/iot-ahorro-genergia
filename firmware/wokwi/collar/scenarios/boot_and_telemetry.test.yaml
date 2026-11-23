@@ -1,0 +1,12 @@
+# wokwi-cli firmware/wokwi/collar --scenario scenarios/boot_and_telemetry.test.yaml --timeout 60000
+name: 'Collar: arranque, reinicio y telemetría periódica'
+version: 1
+author: 'Grupo 1'
+steps:
+  - wait-serial: '# collar DEV_ID=0x101 listo'
+  - wait-serial: '# tx tel seq=0 fix=0'      # primera TX inmediata, todavía sin fix
+  - set-control:
+      part-id: bat
+      control: position
+      value: 0.5
+  - wait-serial: '# tx tel seq=1 fix=2'      # 15 s después, con fix 3D del GPS simulado

@@ -1,0 +1,8 @@
+# Wokwi (VS Code / wokwi-cli) — Unidad, ESP32 (Wokwi no tiene Wemos D1 R32:
+# se usa ESP32 DevKit v1 con los mismos GPIO). Sin BLE: ver src/unit/ble_gateway.h
+# Compilar antes:  pio run -e unit_sim
+[wokwi]
+version = 1
+firmware = '../../.pio/build/unit_sim/firmware.bin'
+elf = '../../.pio/build/unit_sim/firmware.elf'
+rfc2217ServerPort = 4001

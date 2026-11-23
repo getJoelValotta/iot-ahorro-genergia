@@ -1,0 +1,8 @@
+# Wokwi (VS Code / wokwi-cli) — Collar, Arduino Nano.
+# Compilar antes:  pio run -e collar_sim     (o collar_sim_interop para pruebas cruzadas)
+[wokwi]
+version = 1
+firmware = '../../.pio/build/collar_sim/firmware.hex'
+elf = '../../.pio/build/collar_sim/firmware.elf'
+# Puerto serie expuesto por RFC2217 (RadioSim): lo usa tools/radiosim_bridge.py
+rfc2217ServerPort = 4000
