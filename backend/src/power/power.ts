@@ -20,7 +20,7 @@ import type { Command } from '@ovenbird/node';
 import { Transform } from 'class-transformer';
 import { IsIn } from 'class-validator';
 import { type AuthUser, CurrentUser } from '../common/auth-user';
-import { Problems } from '../common/problem';
+import { ProblemException, Problems } from '../common/problem';
 import { APP_CONFIG, type AppConfig } from '../config/app-config';
 import type { CommandStatus, PetRecord, PowerMode } from '../database/records';
 import { PetsRepository } from '../database/repositories';
@@ -94,8 +94,15 @@ export class PowerService {
   async get(userId: string, petId: string): Promise<PowerStateDto> {
     let pet = await this.withDevice(userId, petId);
     if (pet.powerCommandStatus === 'pending' && pet.powerCommandId) {
-      const cmd = await this.ovenbird.getCommand(pet.powerCommandId);
-      const status = commandOutcome(cmd);
+      const status = await this.ovenbird
+        .getCommand(pet.powerCommandId)
+        .then(commandOutcome)
+        .catch((err: unknown) => {
+          // Ovenbird ya no tiene el comando (vencido y purgado): nunca se va a confirmar.
+          if (err instanceof ProblemException && err.status === 404)
+            return 'failed' as const;
+          throw err;
+        });
       if (status !== 'pending') {
         pet =
           (await this.petsRepo.update(userId, petId, {
@@ -125,7 +132,8 @@ export class PowerService {
       powerRequestedAt: new Date(),
     });
     if (!updated) throw Problems.petNotFound();
-    return this.state(updated);
+    // El comando ya salió y quedó guardado: si leer la batería falla, se responde igual (null).
+    return this.state(updated, { batteryOptional: true });
   }
 
   private async withDevice(userId: string, petId: string): Promise<PetRecord> {
@@ -148,9 +156,17 @@ export class PowerService {
     return Math.min(3600, Math.max(120, this.config.powerSavingIntervalS * 4));
   }
 
-  private async state(pet: PetRecord): Promise<PowerStateDto> {
-    const status = await this.ovenbird.deviceStatus(pet.deviceId as string);
-    const raw = status.dps.battery_pct?.value;
+  private async state(
+    pet: PetRecord,
+    opts: { batteryOptional?: boolean } = {},
+  ): Promise<PowerStateDto> {
+    const status = await this.ovenbird
+      .deviceStatus(pet.deviceId as string)
+      .catch((err: unknown) => {
+        if (opts.batteryOptional) return null;
+        throw err;
+      });
+    const raw = status?.dps.battery_pct?.value;
     const batteryPct =
       typeof raw === 'number' && Number.isFinite(raw) ? raw : null;
     return {

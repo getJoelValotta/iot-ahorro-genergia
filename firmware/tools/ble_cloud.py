@@ -24,13 +24,13 @@ import urllib.error
 import urllib.request
 from typing import Callable
 
+import pet_frames as pf
+
 PRODUCT_ID = "ob.lora.unit"
 DEFAULT_URL = "https://iotplatform.ovenbirdconsulting.com.ar"
 
-# Perfil BLE v1 (little-endian), mismos formatos que pet_frames.ble_*.
-LOCATION_FMT = "<iiHBBI"  # lat_e7, lon_e7, hdop_x100, fix, reservado, ts
-STATUS_FMT = "<BbbBHH"  # battery, rssi, snr, flags, seq, age_s
-ACK_FMT = "<HB"  # cmd_id, result
+# Perfil BLE v1 (little-endian): formatos definidos una sola vez en pet_frames.
+LOCATION_FMT, STATUS_FMT, ACK_FMT = pf.BLE_LOCATION_FMT, pf.BLE_STATUS_FMT, pf.BLE_ACK_FMT
 OP_FIND_ME, OP_SET_INTERVAL = 1, 2
 BLE_FIX = {2: "2d", 3: "3d"}
 ACK_DETAIL = {1: "busy", 2: "unsupported", 3: "sin respuesta del collar"}
@@ -270,7 +270,7 @@ class FakePhone:
                 self.client.ack(cloud_id, False, f"{dp} no soportado")
                 return
             ble_id = self._next_ble_id()
-            payload = struct.pack("<HBH", ble_id, spec[0], value)
+            payload = pf.ble_command(ble_id, spec[0], value)
             lines.append((ble_id, f">ble {payload.hex()}"))
         if not lines:
             self.client.ack(cloud_id, False, "comando vacío")

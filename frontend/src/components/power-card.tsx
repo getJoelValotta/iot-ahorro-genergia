@@ -5,7 +5,7 @@ import { BatteryCharging, CheckCircle2, CircleAlert, Loader2 } from "lucide-reac
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { ErrorMessage, Loading } from "@/components/error-message";
-import { api, ApiError, useResource } from "@/lib/api";
+import { api, ApiError, useResource, asApiError } from "@/lib/api";
 import { formatHours, timeAgo } from "@/lib/format";
 import type { PowerMode, PowerState } from "@/lib/types";
 
@@ -33,7 +33,7 @@ export function PowerCard({ petId }: { petId: string }) {
       const next = await api<PowerState>(`/pets/${petId}/power`, { method: "PUT", body: { mode } });
       power.setData(next);
     } catch (err) {
-      setError(err instanceof ApiError ? err : new ApiError("Error inesperado.", 0, null));
+      setError(asApiError(err));
     } finally {
       setSending(false);
     }

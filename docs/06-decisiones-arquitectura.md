@@ -67,9 +67,10 @@ en simulación es la capa física de radio y BLE.
 | `GET /devices` | `{ data, meta? }` | `{ data }` | Devolvemos `{ data, meta }`. El front no exige `meta`. |
 | `POST /pairing-codes` | `{ label? }` | sin body | Body opcional; si falta, label por defecto. |
 | Ruta de variante no soportada | `404` | `501` opcional | Devolvemos `404` (problem+json). El front trata `404` y `501` igual. |
-| `POST /embed-token` | `{ deviceIds?, petId?, ttlS? }` | `{ deviceIds? }` | Aceptamos todo; `ttlS` por defecto 900, máximo 3600. |
+| `POST /embed-token` | `{ deviceIds?, petId?, ttlS? }` | `{ deviceIds? }` | Aceptamos todo; `ttlS` por defecto 900 y se **ajusta** a 60..3600 (no da 400). |
 | `409` de email | `EMAIL_ALREADY_EXISTS` / `EMAIL_TAKEN` | `EMAIL_TAKEN` | Devolvemos `code: "EMAIL_TAKEN"`. |
 | Puerto del back | `3001` | `3000` | `3001` (el `3000` es de Next). |
+| "Aparecidos en la ventana" de `GET /devices` | regla 3 | — | Un collar libre se ve si se **creó o reportó** (`createdAt` o `lastSeenAt`) durante un código del usuario: Ovenbird conserva `deviceId` y `createdAt` al re-emparejar el mismo `uid`. |
 | Campos opcionales de `Pet`/`User` | `?: string \| null` | `?: string` | Devolvemos `null` cuando falta; el front acepta `null` o ausente. |
 
 ### 3.2 Intermediario con cookie (BFF): riesgos y mitigaciones

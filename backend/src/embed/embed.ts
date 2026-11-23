@@ -23,7 +23,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  Min,
 } from 'class-validator';
 import { type AuthUser, CurrentUser } from '../common/auth-user';
 import { ProblemException } from '../common/problem';
@@ -35,6 +34,7 @@ import { PetsService } from '../pets/pets.service';
 
 /** Límites de Ovenbird para `embed.createToken`. */
 const MAX_DEVICES = 50;
+const MIN_TTL_S = 60;
 const MAX_TTL_S = 3600;
 
 export class EmbedTokenRequestDto {
@@ -56,13 +56,14 @@ export class EmbedTokenRequestDto {
 
   @ApiPropertyOptional({
     default: 900,
+    minimum: MIN_TTL_S,
     maximum: MAX_TTL_S,
-    description: 'Se recorta a 3600',
+    description:
+      'Se ajusta al rango 60..3600 (no da error: contrato tolerante)',
   })
   @IsOptional()
   @Type(() => Number)
   @IsInt({ message: 'debe ser un entero' })
-  @Min(60, { message: 'debe ser al menos 60' })
   ttlS?: number;
 }
 
@@ -123,7 +124,10 @@ export class EmbedService {
     }
 
     if (ids.length === 0) throw noLinkedDevices();
-    const ttlS = Math.min(dto.ttlS ?? this.config.embedTokenTtlS, MAX_TTL_S);
+    const ttlS = Math.min(
+      Math.max(dto.ttlS ?? this.config.embedTokenTtlS, MIN_TTL_S),
+      MAX_TTL_S,
+    );
     const { token, expiresAt } = await this.ovenbird.createEmbedToken(
       ids.slice(0, MAX_DEVICES),
       ttlS,

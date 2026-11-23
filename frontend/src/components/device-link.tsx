@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ErrorMessage, Loading } from "@/components/error-message";
-import { api, ApiError, useResource } from "@/lib/api";
+import { api, ApiError, useResource, asApiError } from "@/lib/api";
 import { timeAgo } from "@/lib/format";
 import type { Device, Page, Pet } from "@/lib/types";
 
@@ -29,7 +29,7 @@ export function DeviceLink({ pet, onChange }: { pet: Pet; onChange: (pet: Pet | 
       await action();
       await devices.reload();
     } catch (err) {
-      setError(err instanceof ApiError ? err : new ApiError("Error inesperado.", 0, null));
+      setError(asApiError(err));
     } finally {
       setBusy(false);
     }

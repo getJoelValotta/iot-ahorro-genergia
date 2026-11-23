@@ -81,6 +81,12 @@ export async function forwardToBackend(
   if (segments.some((s) => s === ".." || s === "." || s === "")) {
     return problem(400, "BAD_PATH", "Ruta inválida", "La ruta pedida no es válida.");
   }
+  // Login y registro solo por /api/auth/*: por acá el token llegaría al JavaScript del navegador.
+  // (Express no distingue mayúsculas en las rutas, por eso se compara en minúsculas.)
+  const [first, second] = segments.map((s) => s.toLowerCase());
+  if (first === "auth" && (second === "login" || second === "register")) {
+    return problem(404, "NOT_FOUND", "No encontrado", "Usá /api/auth para iniciar sesión.");
+  }
 
   const url = `${deps.backendUrl}/${segments.map(encodeURIComponent).join("/")}${req.nextUrl.search}`;
   const headers = new Headers({ accept: "application/json" });

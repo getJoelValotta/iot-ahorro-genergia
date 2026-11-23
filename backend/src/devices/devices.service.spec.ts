@@ -38,17 +38,45 @@ describe('DevicesService (vínculo con Ovenbird simulado)', () => {
     expect(session.expiresAt.toISOString()).toBe(expiresAt);
   });
 
-  it('un dispositivo creado fuera de la ventana no es visible', async () => {
+  it('un dispositivo creado y visto fuera de la ventana no es visible', async () => {
     await service.createPairingCode('u1');
+    const later = new Date(Date.now() + 20 * 60_000);
+    const earlier = new Date(Date.now() - 20 * 60_000);
     ovenbird.addDevice({
       deviceId: 'tarde',
-      createdAt: new Date(Date.now() + 20 * 60_000),
+      createdAt: later,
+      lastSeenAt: later,
     });
     ovenbird.addDevice({
       deviceId: 'temprano',
-      createdAt: new Date(Date.now() - 20 * 60_000),
+      createdAt: earlier,
+      lastSeenAt: earlier,
+    });
+    ovenbird.addDevice({
+      deviceId: 'nunca',
+      createdAt: earlier,
+      lastSeenAt: null,
     });
     expect((await service.list('u1', page)).data).toEqual([]);
+  });
+
+  it('una unidad libre re-emparejada (creada antes) aparece si reporta durante la ventana', async () => {
+    // Ovenbird conserva deviceId y createdAt al re-emparejar el mismo uid.
+    await service.createPairingCode('u1');
+    ovenbird.addDevice({
+      deviceId: 'reemparejada',
+      createdAt: new Date(Date.now() - 2 * 3600_000),
+      lastSeenAt: new Date(),
+    });
+    const a = await pets.create('u1', { name: 'A', species: 'dog' });
+    expect(
+      (await service.list('u1', page)).data.map((d) => d.deviceId),
+    ).toEqual(['reemparejada']);
+    expect((await service.link('u1', a.id, 'reemparejada')).deviceId).toBe(
+      'reemparejada',
+    );
+    // Otro usuario sin código abierto no la ve.
+    expect((await service.list('u2', page)).data).toEqual([]);
   });
 
   it('vincula, es idempotente y rechaza conflictos', async () => {

@@ -210,6 +210,18 @@ Sesión de preguntas y decisiones (sin código). Todo lo decidido, con sus motiv
 - Datos de prueba que quedaron:
   - en la base local, el usuario `demo-ui@example.test` con la mascota "Firulais";
   - en Ovenbird, la unidad "OB-0002 (prueba UI)", en modo ahorro.
+- **Revisión de código** (dos revisores: normas del repo y cumplimiento de los tickets). Arreglado,
+  con tests:
+  - `GET /devices`: una unidad libre **re-emparejada** no volvía a aparecer, porque Ovenbird conserva
+    su `createdAt`. Ahora cuenta también si reportó durante la ventana.
+  - Tarjeta de ahorro: si Ovenbird ya no tiene el comando, se marca "no respondió" en vez de dar 404
+    para siempre. Un `PUT` ya enviado no da 503 si falla leer la batería.
+  - `embed-token`: `ttlS` chico se ajusta a 60 en vez de dar 400.
+  - El proxy del front ya no deja pasar login y registro, para que el token nunca llegue al navegador.
+  - Se sacó código repetido: errores en el front (`asApiError`) y formatos BLE en Python (uno solo,
+    en `pet_frames.py`).
+  - Quedan como mejoras opcionales, sin bug: repositorios por módulo, textos de intervalo fijos en la
+    tarjeta, y especies fuera de dog/cat/other (hoy dan 400, como pide el ticket 03).
 
 ### Pendiente
 - Deploy en Vercel + Supabase en la nube, y links en el README.

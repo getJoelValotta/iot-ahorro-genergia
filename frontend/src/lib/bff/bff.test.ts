@@ -99,6 +99,20 @@ describe("forwardToBackend (proxy /api/backend/*)", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it("no deja usar login/registro por el proxy genérico (devolvería el token al navegador)", async () => {
+    const fetch = backendReturning(200, { accessToken: "jwt-secreto" });
+    for (const action of ["login", "register"]) {
+      const res = await forwardToBackend(
+        req(`/api/backend/auth/${action}`, { method: "POST", body: { email: "a@b.c", password: "x" } }),
+        ["auth", action],
+        { fetch, backendUrl: BACKEND },
+      );
+      expect(res.status).toBe(404);
+      expect(await res.text()).not.toContain("jwt-secreto");
+    }
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it("si el backend no responde, devuelve 502 problem+json sin detalles", async () => {
     const fetch = vi.fn(async () => {
       throw new Error("connect ECONNREFUSED 10.1.1.1:3001");

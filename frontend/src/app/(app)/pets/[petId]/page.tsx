@@ -20,7 +20,7 @@ import { ErrorMessage, Loading } from "@/components/error-message";
 import { PetAvatar } from "@/components/pet-avatar";
 import { PetForm, type PetInput } from "@/components/pet-form";
 import { PowerCard } from "@/components/power-card";
-import { api, ApiError, useResource } from "@/lib/api";
+import { api, ApiError, useResource, asApiError } from "@/lib/api";
 import { useHasVariant } from "@/lib/capabilities";
 import { SPECIES_LABEL, type Pet } from "@/lib/types";
 
@@ -47,7 +47,7 @@ export default function PetDetailPage() {
       await api<void>(`/pets/${petId}`, { method: "DELETE" });
       router.replace("/pets");
     } catch (err) {
-      setDeleteError(err instanceof ApiError ? err : new ApiError("Error inesperado.", 0, null));
+      setDeleteError(asApiError(err));
       setDeleting(false);
     }
   }

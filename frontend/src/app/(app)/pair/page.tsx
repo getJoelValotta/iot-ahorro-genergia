@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { OnlineDot } from "@/components/device-link";
 import { ErrorMessage, Loading } from "@/components/error-message";
-import { api, ApiError, useResource } from "@/lib/api";
+import { api, ApiError, useResource, asApiError } from "@/lib/api";
 import { countdown, timeAgo } from "@/lib/format";
 import type { Device, Page, Pet } from "@/lib/types";
 
@@ -33,7 +33,7 @@ export default function PairPage() {
     try {
       setCode(await api<Code>("/pairing-codes", { method: "POST", body: {} }));
     } catch (err) {
-      setError(err instanceof ApiError ? err : new ApiError("Error inesperado.", 0, null));
+      setError(asApiError(err));
     } finally {
       setBusy(false);
     }

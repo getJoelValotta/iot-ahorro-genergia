@@ -22,6 +22,12 @@ export class ApiError extends Error {
 }
 
 const GENERIC = "Error inesperado. Probá de nuevo.";
+const networkError = () => new ApiError("Sin conexión. Revisá tu red.", 0, "NETWORK_ERROR");
+
+/** Cualquier error atrapado → `ApiError` para mostrar (lo inesperado queda como mensaje genérico). */
+export function asApiError(err: unknown): ApiError {
+  return err instanceof ApiError ? err : new ApiError(GENERIC, 0, null);
+}
 
 /** Mensaje para el usuario: `detail` → `title` → genérico (nunca detalles internos). */
 export async function toApiError(res: Response): Promise<ApiError> {
@@ -63,7 +69,7 @@ export async function api<T>(
       cache: "no-store",
     });
   } catch {
-    throw new ApiError("Sin conexión. Revisá tu red.", 0, "NETWORK_ERROR");
+    throw networkError();
   }
   if (res.status === 401 && path !== "/capabilities") {
     goToLogin();
@@ -87,7 +93,7 @@ export async function authAction(
       body: JSON.stringify(body ?? {}),
     });
   } catch {
-    throw new ApiError("Sin conexión. Revisá tu red.", 0, "NETWORK_ERROR");
+    throw networkError();
   }
   if (!res.ok) throw await toApiError(res);
 }
@@ -136,7 +142,7 @@ export function useResource<T>(
       },
       (err: unknown) => {
         if (!current()) return;
-        setError(err instanceof ApiError ? err : new ApiError(GENERIC, 0, null));
+        setError(asApiError(err));
         setLoadedPath(path);
       },
     );

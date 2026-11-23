@@ -194,19 +194,26 @@ class StreamParser:
 
 
 # ---------------------------------------------------------------- BLE v1 -----
+# Formatos del perfil BLE v1 de Ovenbird (little-endian). Única definición: ble_cloud.py los reusa.
+BLE_LOCATION_FMT = "<iiHBBI"  # lat_e7, lon_e7, hdop_x100, fix, reservado, ts
+BLE_STATUS_FMT = "<BbbBHH"  # battery, rssi, snr, flags, seq, age_s
+BLE_COMMAND_FMT = "<HBH"  # cmd_id, opcode, arg
+BLE_ACK_FMT = "<HB"  # cmd_id, result
+
+
 def ble_location(lat_e7: int, lon_e7: int, hdop_x100: int, fix: int, ts: int) -> bytes:
     if fix == 0:
         lat_e7 = lon_e7 = 0
-    return struct.pack("<iiHBBI", lat_e7, lon_e7, hdop_x100, fix, 0, ts)
+    return struct.pack(BLE_LOCATION_FMT, lat_e7, lon_e7, hdop_x100, fix, 0, ts)
 
 
 def ble_status(bat: int, rssi: int, snr: int, online: bool, seq: int, age_s: int) -> bytes:
-    return struct.pack("<BbbBHH", bat, rssi, snr, 1 if online else 0, seq, age_s)
+    return struct.pack(BLE_STATUS_FMT, bat, rssi, snr, 1 if online else 0, seq, age_s)
 
 
 def ble_command(cmd_id: int, opcode: int, arg: int) -> bytes:
-    return struct.pack("<HBH", cmd_id, opcode, arg)
+    return struct.pack(BLE_COMMAND_FMT, cmd_id, opcode, arg)
 
 
 def ble_ack(cmd_id: int, result: int) -> bytes:
-    return struct.pack("<HB", cmd_id, result)
+    return struct.pack(BLE_ACK_FMT, cmd_id, result)

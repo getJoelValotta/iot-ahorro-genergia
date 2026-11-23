@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ErrorMessage } from "@/components/error-message";
-import { ApiError, authAction } from "@/lib/api";
+import { ApiError, authAction, asApiError } from "@/lib/api";
 
 /** Solo rutas internas como destino después del login (evita redirecciones abiertas). */
 function safeNext(next: string | null): string {
@@ -51,7 +51,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       router.replace(safeNext(params.get("next")));
       router.refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err : new ApiError("Error inesperado.", 0, null));
+      setError(asApiError(err));
       setBusy(false);
     }
   }

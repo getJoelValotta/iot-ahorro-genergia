@@ -1,4 +1,4 @@
-import { OvenbirdError } from '@ovenbird/node';
+import { OvenbirdError, OvenbirdNotFoundError } from '@ovenbird/node';
 import {
   createPet,
   createTestApp,
@@ -248,6 +248,44 @@ describe('Variante power-saving (tickets 07 y 08)', () => {
       .expect(200);
     expect(get.body.mode).toBe('normal');
     expect(get.body.command.status).toBe('none');
+  });
+
+  it('PUT ya enviado no da error si después falla leer la batería (202, batteryPct null)', async () => {
+    const { auth } = await registerUser(t);
+    const petId = await petWithDevice(t, auth, 'p15');
+    t.ovenbird.failWith(new OvenbirdError(502, 'bad_gateway', 'x'), 'status');
+    const res = await t
+      .http()
+      .put(`/api/v1/pets/${petId}/power`)
+      .set('Authorization', auth)
+      .send({ mode: 'saving' })
+      .expect(202);
+    expect(res.body.mode).toBe('saving');
+    expect(res.body.command.status).toBe('pending');
+    expect(res.body.batteryPct).toBeNull();
+    t.ovenbird.clearFailures();
+  });
+
+  it('GET con un comando que Ovenbird ya no tiene (404) lo marca failed en vez de dar error', async () => {
+    const { auth } = await registerUser(t);
+    const petId = await petWithDevice(t, auth, 'p16');
+    await t
+      .http()
+      .put(`/api/v1/pets/${petId}/power`)
+      .set('Authorization', auth)
+      .send({ mode: 'saving' })
+      .expect(202);
+    t.ovenbird.failWith(
+      new OvenbirdNotFoundError(404, 'not_found', 'command'),
+      'getCommand',
+    );
+    const res = await t
+      .http()
+      .get(`/api/v1/pets/${petId}/power`)
+      .set('Authorization', auth)
+      .expect(200);
+    expect(res.body.command.status).toBe('failed');
+    t.ovenbird.clearFailures();
   });
 
   it('GET con Ovenbird caído → 503', async () => {

@@ -104,7 +104,7 @@ describe('POST /embed-token (ticket 06)', () => {
     expect(t.ovenbird.embedRequests.at(-1)?.deviceIds).toEqual(['e9']);
   });
 
-  it('ttlS se respeta y se recorta a 3600', async () => {
+  it('ttlS se respeta y se recorta a 60..3600 (contrato tolerante)', async () => {
     const { auth } = await registerUser(t);
     await petWithDevice(t, auth, 'e10');
     await t
@@ -121,6 +121,13 @@ describe('POST /embed-token (ticket 06)', () => {
       .send({ ttlS: 99999 })
       .expect(200);
     expect(t.ovenbird.embedRequests.at(-1)?.ttlS).toBe(3600);
+    await t
+      .http()
+      .post('/api/v1/embed-token')
+      .set('Authorization', auth)
+      .send({ ttlS: 10 })
+      .expect(200);
+    expect(t.ovenbird.embedRequests.at(-1)?.ttlS).toBe(60);
     await t
       .http()
       .post('/api/v1/embed-token')

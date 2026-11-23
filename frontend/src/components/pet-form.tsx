@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/auth-form";
 import { ErrorMessage } from "@/components/error-message";
-import { ApiError } from "@/lib/api";
+import { ApiError, asApiError } from "@/lib/api";
 import { SPECIES_LABEL, type Pet } from "@/lib/types";
 
 export type PetInput = {
@@ -46,7 +46,7 @@ export function PetForm({
         photoUrl: opt("photoUrl"),
       });
     } catch (err) {
-      setError(err instanceof ApiError ? err : new ApiError("Error inesperado.", 0, null));
+      setError(asApiError(err));
     } finally {
       setBusy(false);
     }

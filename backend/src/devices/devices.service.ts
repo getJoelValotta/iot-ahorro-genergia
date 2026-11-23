@@ -103,7 +103,11 @@ export class DevicesService {
       await this.petsRepo.update(userId, petId, { deviceId: null });
   }
 
-  /** Collares del usuario + libres aparecidos en sus ventanas de emparejamiento. */
+  /**
+   * Collares del usuario + libres aparecidos en sus ventanas de emparejamiento. Límite conocido:
+   * un collar libre de otro usuario del mismo proyecto que reporte durante mi ventana también se ve
+   * (igual que con la regla original por createdAt); vincularlo exige que siga libre.
+   */
   private async visibleDevices(userId: string): Promise<DeviceDto[]> {
     const [devices, sessions] = await Promise.all([
       this.ovenbird.listAllDevices(),
@@ -116,14 +120,17 @@ export class DevicesService {
       linked.map((p) => [p.deviceId as string, p]),
     );
 
-    const inUserWindow = (d: Device) => {
-      const t = d.createdAt.getTime();
-      return sessions.some(
+    const inSomeWindow = (when: Date | null) =>
+      when !== null &&
+      sessions.some(
         (s) =>
-          t >= s.createdAt.getTime() - CLOCK_SKEW_MS &&
-          t <= s.expiresAt.getTime() + CLOCK_SKEW_MS,
+          when.getTime() >= s.createdAt.getTime() - CLOCK_SKEW_MS &&
+          when.getTime() <= s.expiresAt.getTime() + CLOCK_SKEW_MS,
       );
-    };
+    // "Apareció en la ventana": se creó en ella, o (re-emparejada) reportó durante ella. Ovenbird
+    // conserva deviceId y createdAt al re-emparejar el mismo uid, así que createdAt solo no alcanza.
+    const inUserWindow = (d: Device) =>
+      inSomeWindow(d.createdAt) || inSomeWindow(d.lastSeenAt);
 
     return devices
       .filter((d) => {

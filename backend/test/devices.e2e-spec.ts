@@ -52,6 +52,7 @@ describe('Emparejamiento y dispositivos (ticket 04)', () => {
     t.ovenbird.addDevice({
       deviceId: 'viejo',
       createdAt: new Date(Date.now() - 3600_000),
+      lastSeenAt: new Date(Date.now() - 3600_000),
     });
     await pairDevice(t, a.auth, 'dev-a');
 
