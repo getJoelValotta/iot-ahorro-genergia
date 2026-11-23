@@ -47,3 +47,17 @@ vendor/     tarballs del SDK de Ovenbird (descargados por setup, ignorados por g
 - Consigna pide **Jest** en el backend → NestJS 11 (Nest 12 usa Vitest).
 - Idioma: código/identificadores en inglés (contrato camelCase), comentarios y docs en español.
 - Wokwi: si hay que operar wokwi.com, usar el navegador integrado de Claude (la sesión de wokwi.com vive ahí).
+
+## Agent skills
+
+### Issue tracker
+
+Issues y specs en GitHub Issues del repo (`gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Las cinco etiquetas por defecto (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` en la raíz + `docs/adr/`; las decisiones vigentes están en `docs/06-decisiones-arquitectura.md`. See `docs/agents/domain.md`.
