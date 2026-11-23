@@ -128,6 +128,8 @@ Sesión de preguntas y decisiones (sin código). Todo lo decidido, con sus motiv
 **3. Vercel** (después del primer push de los esqueletos, Fase 1b)
 - [ ] *Add New → Project → Import* el repo de GitHub **dos veces**:
       `Root Directory = backend` y `Root Directory = frontend`.
+- [ ] Ir anotando los secretos de Supabase y Vercel en el `.env` de la raíz (ignorado por git;
+      plantilla con dónde se saca cada valor en `.env.example`).
 - [ ] Cargar las variables de `docs/06` §6 en cada proyecto (panel *Settings → Environment Variables*
       o `vercel env add <NOMBRE>`). En el front, `NEXT_PUBLIC_API_URL` = URL del back en Vercel + `/api/v1`.
 - [ ] Pasar las dos URLs resultantes para agregarlas al README y a los orígenes de Ovenbird.
@@ -145,3 +147,12 @@ Sesión de preguntas y decisiones (sin código). Todo lo decidido, con sus motiv
 3. **Fase 3**: frontend con BFF, mapa y tarjeta de ahorro.
 4. **Fase 4**: "celular falso" + demo con Wokwi + `docs/07-demo.md`.
 5. **Fase 5**: README final.
+
+## Sesión 3 — 2026-11-23: secretos de la nube
+- `.env` en la raíz (ignorado por git) con todos los valores de Supabase, Vercel, Ovenbird y
+  `JWT_SECRET` (generado al azar). Plantilla con de dónde sale cada valor: `.env.example`.
+- Verificado: las credenciales de Ovenbird obtienen token (`POST /v1/auth/token` → 200) y los cuatro
+  orígenes (`localhost:3000/3001` y las dos URLs de Vercel) están aceptados por CORS.
+- URLs de la app: back `https://iot-ahorro-genergia.vercel.app`, front
+  `https://iot-ahorro-genergiafrontend.vercel.app`. Los tokens de Vercel son de proyecto (uno por proyecto).
+- Pendiente: Root Directory en Vercel y rotar los secretos que pasaron por el chat (ver PLAN Fase 0).

@@ -10,11 +10,15 @@ Reparto por frentes si trabaja más de una persona: (1) back core, (2) back Oven
 
 ## Fase 0 — Tareas manuales del equipo
 Checklist detallada con el paso a paso en [avances.md](avances.md) (sesión 2).
-- [ ] Ovenbird: agregar orígenes `http://localhost:3000`, `http://localhost:3001` (y luego la URL de Vercel).
+- [x] Ovenbird: agregar orígenes `http://localhost:3000`, `http://localhost:3001` y las dos URLs de Vercel (verificado por CORS).
 - [ ] Ovenbird: crear el dispositivo virtual del proyecto.
 - [ ] Ovenbird: **regenerar el `clientSecret`** antes de la entrega (el actual se compartió en un chat).
-- [ ] Supabase: crear el proyecto en la nube (nombre sugerido `iot-mascotas-g1`).
+- [x] Supabase: crear el proyecto en la nube (credenciales en el `.env` de la raíz).
 - [ ] Vercel: importar el repo como dos proyectos (`backend/` y `frontend/`) y cargar las variables.
+      Proyectos creados (`iot-ahorro-genergia` y `iot-ahorro-genergia_frontend`); falta Root Directory
+      (`backend` / `frontend`) cuando existan las carpetas, y cargar las variables.
+- [ ] **Rotar antes de la entrega** (pasaron por el chat): tokens de Vercel, access token y `sb_secret` de
+      Supabase, contraseña de la base, `clientSecret` de Ovenbird.
 - [ ] Iniciar sesión en wokwi.com en el navegador integrado de Claude (para publicar los proyectos).
 - [x] `WOKWI_CLI_TOKEN`, `wokwi-cli`, PlatformIO, `g++` (MinGW) instalados.
 
