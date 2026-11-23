@@ -23,7 +23,9 @@ backend/prisma/*.db
 backend/prisma/*.db-journal
 
 # Vendor SDK de Ovenbird (se descarga con scripts/setup)
-vendor/*.tgz
+vendor/*
+!vendor/*.tgz
+!vendor/openapi.json
 
 # Editor / SO
 .DS_Store

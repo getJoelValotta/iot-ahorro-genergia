@@ -221,6 +221,23 @@ void test_queue_window_mode_and_ack() {
   TEST_ASSERT_FALSE(q.onAck(wrong, ble_id, res));
 }
 
+// Hallado en la prueba E2E con Wokwi: después de confirmar el paso a ahorro, la unidad
+// tiene que dejar de mandar comandos "al instante" (el collar ya no escucha siempre).
+void test_continuous_rx_after_set_interval_ack() {
+  Command ahorro = mk(1, kCmdSetInterval, 2, 0, 150);
+  Command normal = mk(2, kCmdSetInterval, 2, 0, 15);
+  Command find = mk(3, kCmdFindMe, 1, 5);
+  TEST_ASSERT_FALSE(continuousRxAfterAck(ahorro, kAckOk, true));
+  TEST_ASSERT_TRUE(continuousRxAfterAck(normal, kAckOk, false));
+  // Umbral exacto del firmware del collar: 100 s ya es ahorro.
+  TEST_ASSERT_FALSE(continuousRxAfterAck(mk(4, kCmdSetInterval, 2, 0, 100), kAckOk, true));
+  TEST_ASSERT_TRUE(continuousRxAfterAck(mk(5, kCmdSetInterval, 2, 0, 99), kAckOk, false));
+  // Sin cambios si no se aplicó o no es SET_INTERVAL.
+  TEST_ASSERT_TRUE(continuousRxAfterAck(ahorro, kAckInvalidParam, true));
+  TEST_ASSERT_FALSE(continuousRxAfterAck(find, kAckOk, false));
+  TEST_ASSERT_TRUE(continuousRxAfterAck(find, kAckOk, true));
+}
+
 void test_nmea_checksum_and_format() {
   NmeaFix f = {-38005500, -57542600, 12, 34, 56, 23, 11, 26, 8, 120, true};
   char buf[100];
@@ -256,6 +273,7 @@ int main(int, char**) {
   RUN_TEST(test_ble_to_lora_mapping);
   RUN_TEST(test_queue_continuous_retries_then_expires);
   RUN_TEST(test_queue_window_mode_and_ack);
+  RUN_TEST(test_continuous_rx_after_set_interval_ack);
   RUN_TEST(test_nmea_checksum_and_format);
   return UNITY_END();
 }

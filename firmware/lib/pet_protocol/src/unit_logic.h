@@ -50,6 +50,11 @@ bool bleToLoraCommand(const ble::Command& in, uint8_t lora_cmd_id, Command& out)
 // Traducción del RESULT LoRa al result BLE.
 uint8_t loraResultToBle(uint8_t lora_result);
 
+// ¿El collar escucha siempre después de este ACK? Un SET_INTERVAL confirmado cambia el modo
+// al instante (>= 100 s => ahorro, RX solo en ventanas); la próxima telemetría tarda hasta
+// un intervalo en avisarlo. Cualquier otro caso deja `current` como estaba.
+bool continuousRxAfterAck(const Command& acked, uint8_t lora_result, bool current);
+
 // §4.1: cola de comandos hacia el collar (>= 4 entradas).
 class UnitCommandQueue {
  public:

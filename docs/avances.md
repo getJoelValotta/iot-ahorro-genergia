@@ -156,3 +156,30 @@ Sesión de preguntas y decisiones (sin código). Todo lo decidido, con sus motiv
 - URLs de la app: back `https://iot-ahorro-genergia.vercel.app`, front
   `https://iot-ahorro-genergiafrontend.vercel.app`. Los tokens de Vercel son de proyecto (uno por proyecto).
 - Pendiente: Root Directory en Vercel y rotar los secretos que pasaron por el chat (ver PLAN Fase 0).
+
+## Sesión 4 — 2026-11-23: back, front y "celular falso" implementados (local, sin deploy)
+
+- **Backend** (`backend/`, NestJS 11): las 14 rutas + `GET/PUT /pets/{id}/power`, errores RFC 9457,
+  Swagger, config validada. 104 tests Jest (unitarios + supertest con Ovenbird falso y repos en memoria).
+  Probado contra Supabase local y Ovenbird real.
+- **Supabase local**: `supabase start` con puertos **54331/54332** (los 54321/54322 los ocupaba otro
+  proyecto en esta PC). Migración en `supabase/migrations/` (incluye `grant` explícito a `service_role`).
+- **Frontend** (`frontend/`, Next 16 + shadcn): BFF con cookie httpOnly (13 tests vitest), login/registro,
+  mascotas, emparejar, ficha con collar y tarjeta "Batería y ahorro", mapa con `@ovenbird/react`.
+  `npm run build` OK. No se revisó visualmente en el navegador todavía.
+- **Celular falso**: `firmware/tools/ble_cloud.py` + `radiosim_bridge.py --cloud --pair-code X` (32 pytest).
+  Formatos reales relevados: `ts` en **segundos**, comandos en `{items: [...]}`.
+- **E2E con Wokwi (wokwi-cli expone RFC2217 en :4000/:4001, no hace falta VS Code)**: verificado
+  emparejar → datos en Ovenbird → vincular → ahorro confirmado en el collar → volver a Normal estando en
+  ahorro (espera la ventana, ~150 s) → "el collar no respondió" (chaos loss=1 → `failed`) → chaos con
+  pérdida/duplicados (la unidad descarta duplicados, el mapa sigue).
+- **Arreglos de firmware surgidos de la E2E** (con test nativo): la unidad actualiza "escucha continua"
+  al confirmarse un SET_INTERVAL (`continuousRxAfterAck`); `RX_WINDOW_MS` configurable y 3000 ms solo en
+  `collar_sim` (latencia de internet entre simulaciones).
+- **Límites de Wokwi gratis**: cada simulación por CLI se corta a los 5 min y **se agotó la cuota mensual
+  de CI**. Para seguir: extensión de VS Code o plan pago.
+
+### Pendiente
+- Demo de corrupción (`chaos corrupt=...`) sin muestra suficiente (cuota agotada).
+- `docs/07-demo.md`, README final y checklist de pruebas cruzadas (tickets 10-11), revisión visual del front,
+  code review, deploy (Vercel/Supabase nube, fuera de esta sesión).

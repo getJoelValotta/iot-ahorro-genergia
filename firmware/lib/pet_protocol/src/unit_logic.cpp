@@ -82,6 +82,13 @@ uint8_t loraResultToBle(uint8_t r) {
   }
 }
 
+bool continuousRxAfterAck(const Command& acked, uint8_t lora_result, bool current) {
+  if (acked.code != kCmdSetInterval || lora_result != kAckOk || acked.plen != 2) {
+    return current;
+  }
+  return getU16BE(acked.params) < kPowerSaveThresholdS;
+}
+
 // ---- UnitCommandQueue --------------------------------------------------------
 bool UnitCommandQueue::enqueue(const Command& cmd, uint16_t ble_cmd_id, uint32_t now_ms) {
   (void)now_ms;

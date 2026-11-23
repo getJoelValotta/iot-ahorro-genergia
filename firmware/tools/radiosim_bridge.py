@@ -13,6 +13,9 @@ Modos:
   --collar X --unit Y   puente completo (collar Wokwi <-> unidad Wokwi)
   --collar X            UNIDAD VIRTUAL: la consola manda comandos LoRa al collar
   --unit Y              COLLAR VIRTUAL: genera telemetría y responde ACKs
+  --cloud               + CELULAR FALSO: empareja la unidad en Ovenbird con --pair-code, sube
+                        lo que publica por BLE y le pasa los comandos de la nube (ble_cloud.py).
+                        URL: variable OVENBIRD_URL (por defecto la plataforma oficial).
 
 Consola (stdin):
   find <s>        FIND_ME (0..60)          interval <s>   SET_INTERVAL (5..3600)
@@ -32,8 +35,11 @@ import sys
 import threading
 import time
 
+import os
+
 import serial  # pyserial
 
+import ble_cloud
 import pet_frames as pf
 
 
@@ -68,8 +74,16 @@ def log(src: str, msg: str) -> None:
         print(f"{time.strftime('%H:%M:%S')} {src:>6} | {msg}", flush=True)
 
 
-def open_port(url: str) -> serial.SerialBase:
-    return serial.serial_for_url(url, baudrate=115200, bytesize=8, parity="N", stopbits=1, timeout=0.05)
+def open_port(url: str, wait_s: float = 30) -> serial.SerialBase:
+    """Abre el puerto; espera hasta `wait_s` a que la simulación levante su servidor RFC2217."""
+    deadline = time.time() + wait_s
+    while True:
+        try:
+            return serial.serial_for_url(url, baudrate=115200, bytesize=8, parity="N", stopbits=1, timeout=0.05)
+        except serial.SerialException:
+            if time.time() >= deadline:
+                raise
+            time.sleep(1)
 
 
 class Bridge:
@@ -84,17 +98,53 @@ class Bridge:
         self.virtual_interval = 15
         self.virtual_last_cmd: tuple[int, bytes] | None = None
         self.running = True
+        self.unit_lock = threading.Lock()  # consola, collar virtual y celular escriben a la unidad
+        self.phone: ble_cloud.FakePhone | None = None
+        self.stop = threading.Event()
+        if args.cloud:
+            self.phone = self.setup_phone(args)
+
+    # --------------------------------------------------------- celular falso ---
+    def setup_phone(self, args: argparse.Namespace) -> ble_cloud.FakePhone:
+        if not self.unit:
+            raise SystemExit("--cloud necesita --unit (la unidad es la que habla BLE)")
+        if not args.pair_code:
+            raise SystemExit("--cloud necesita --pair-code (el código que muestra el portal)")
+        url = os.environ.get("OVENBIRD_URL", ble_cloud.DEFAULT_URL)
+        client = ble_cloud.OvenbirdBridgeClient(url, log=lambda m: log("cloud", m))
+        name = args.name or "OB-" + args.uid.replace(":", "")[-4:].upper()
+        device_id = client.pair(args.pair_code, args.uid, name)
+        log("cloud", f"unidad emparejada en Ovenbird: deviceId={device_id} uid={args.uid} nombre={name}")
+        return ble_cloud.FakePhone(
+            client,
+            lambda line: self.write_unit((line + "\n").encode()),
+            ack_timeout_s=args.ack_timeout,
+            log=lambda m: log("phone", m),
+        )
+
+    def write_unit(self, data: bytes) -> None:
+        with self.unit_lock:
+            self.unit.write(data)
 
     # ------------------------------------------------------------ lectura ---
     def pump(self, name: str, src: serial.SerialBase, dst: serial.SerialBase | None) -> None:
         parser = pf.StreamParser()
         while self.running:
-            data = src.read(256)
+            try:
+                data = src.read(256)
+            except serial.SerialException:
+                # La simulación terminó (p. ej. límite de 5 min de wokwi-cli en el plan gratis).
+                log("bridge", f"se cortó la conexión con {name}; fin del puente")
+                self.running = False
+                self.stop.set()
+                return
             if not data:
                 continue
             frames, lines = parser.feed(data)
             for line in lines:
                 log(name, line)
+                if name == "unit" and self.phone:
+                    self.phone.on_unit_line(line)
             for fr in frames:
                 try:
                     log(name, pf.describe(pf.decode(fr)))
@@ -103,7 +153,10 @@ class Bridge:
                     continue
                 if dst is not None:
                     for out in self.chaos.apply(fr):
-                        dst.write(out)
+                        if dst is self.unit:
+                            self.write_unit(out)
+                        else:
+                            dst.write(out)
                 elif name == "unit":
                     self.virtual_collar_rx(fr)
 
@@ -113,7 +166,7 @@ class Bridge:
         if d["type"] != pf.T_COMMAND or d["dev_id"] != self.dev_id:
             return
         if self.virtual_last_cmd and self.virtual_last_cmd[0] == d["cmd_id"]:
-            self.unit.write(self.virtual_last_cmd[1])  # idempotencia
+            self.write_unit(self.virtual_last_cmd[1])  # idempotencia
             return
         result = 0
         if d["code"] == pf.CMD_SET_INTERVAL:
@@ -126,7 +179,7 @@ class Bridge:
             result = 1
         ack = pf.encode_ack(self.dev_id, d["cmd_id"], d["code"], result)
         self.virtual_last_cmd = (d["cmd_id"], ack)
-        self.unit.write(ack)
+        self.write_unit(ack)
         log("vcollar", pf.describe(pf.decode(ack)))
         if d["code"] == pf.CMD_REQUEST_TELEMETRY and result == 0:
             self.virtual_collar_tx(with_fw=True)
@@ -144,7 +197,7 @@ class Bridge:
         fr = pf.encode_telemetry(self.dev_id, tel)
         log("vcollar", pf.describe(pf.decode(fr)))
         for out in self.chaos.apply(fr):
-            self.unit.write(out)
+            self.write_unit(out)
 
     def virtual_collar_loop(self) -> None:
         nxt = time.time()
@@ -164,7 +217,7 @@ class Bridge:
         line = f">ble {pf.ble_command(self.ble_id, opcode, arg).hex()}\n"
         self.ble_id += 1
         log("app", line.strip())
-        self.unit.write(line.encode())
+        self.write_unit(line.encode())
 
     def console(self) -> None:
         for raw in sys.stdin:
@@ -185,7 +238,7 @@ class Bridge:
                     log("chaos", vars(self.chaos))
                     continue
                 if cmd == "ble" and self.unit:
-                    self.unit.write(f">ble {rest[0]}\n".encode())
+                    self.write_unit(f">ble {rest[0]}\n".encode())
                     continue
                 if cmd in ("ahorro", "normal"):
                     cmd, rest = "interval", ["150" if cmd == "ahorro" else "15"]
@@ -209,6 +262,7 @@ class Bridge:
             except (IndexError, ValueError) as e:
                 log("err", f"argumentos inválidos: {e}")
         self.running = False
+        self.stop.set()
 
     def run(self) -> None:
         threads = []
@@ -220,8 +274,16 @@ class Bridge:
             threads.append(threading.Thread(target=self.virtual_collar_loop, daemon=True))
         for t in threads:
             t.start()
+        if self.phone:
+            self.phone.start(self.stop)
         log("bridge", f"listo (DEV_ID=0x{self.dev_id:04X}). Escribí 'find 10', 'ahorro', 'chaos loss=0.2'...")
-        self.console()
+        # La consola corre aparte: el puente termina con 'quit' o si se corta una simulación.
+        threading.Thread(target=self.console, daemon=True).start()
+        try:
+            while not self.stop.wait(0.5):
+                pass
+        except KeyboardInterrupt:
+            self.running = False
 
 
 def main() -> None:
@@ -230,6 +292,13 @@ def main() -> None:
     ap.add_argument("--unit", help="endpoint serie de la unidad (ej. rfc2217://localhost:4001)")
     ap.add_argument("--dev-id", default="0x0101", help="DEV_ID usado por la unidad/collar virtual")
     ap.add_argument("--seed", type=int, help="semilla para chaos reproducible")
+    ap.add_argument("--cloud", action="store_true", help="activa el celular falso (Ovenbird)")
+    ap.add_argument("--pair-code", help="código de emparejamiento que muestra el portal")
+    ap.add_argument("--uid", default="02:47:31:00:00:01",
+                    help="UID (MAC) de PRUEBA de la unidad simulada; nunca uno real")
+    ap.add_argument("--name", help="nombre del dispositivo en Ovenbird (por defecto OB-xxxx)")
+    ap.add_argument("--ack-timeout", type=float, default=600,
+                    help="segundos sin COMMAND_ACK antes de informar error (ahorro: 3 ventanas de 150 s)")
     args = ap.parse_args()
     if not args.collar and not args.unit:
         ap.error("indicá --collar y/o --unit")

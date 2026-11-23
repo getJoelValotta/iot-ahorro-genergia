@@ -23,7 +23,11 @@
 #ifndef DEFAULT_INTERVAL_S
 #define DEFAULT_INTERVAL_S 15
 #endif
-#define RX_WINDOW_MS 500UL          // ventana RX post-TX en modo ahorro (§4.1)
+// Ventana RX post-TX en modo ahorro (§4.1): 500 ms con radio real. collar_sim la amplía porque
+// en Wokwi la "radio" son dos simulaciones en la nube unidas por internet (ida y vuelta > 500 ms).
+#ifndef RX_WINDOW_MS
+#define RX_WINDOW_MS 500UL
+#endif
 #define GPS_WARMUP_MS 8000UL        // en ahorro el GPS se enciende solo antes de cada TX
 #define REBOOT_FRAMES 3             // tramas con FLAGS.REINICIO tras reset
 

@@ -123,6 +123,12 @@ static void onAck(const Ack& a) {
     uiInterval = getU16BE(acked.params);
     online.setKnownInterval(uiInterval);
   }
+  // El modo del collar cambia con el ACK, no con la próxima telemetría (arreglo E2E).
+  const bool rx = continuousRxAfterAck(acked, result, collarContinuousRx);
+  if (rx != collarContinuousRx) {
+    collarContinuousRx = rx;
+    online.setPowerSaveHint(!rx);
+  }
   LOG_BEGIN(); LOG(F("ack id=")); LOG(a.cmd_id); LOG(F(" result=")); LOGLN(result);
   sendBleAck(bleId, loraResultToBle(result));
 }
