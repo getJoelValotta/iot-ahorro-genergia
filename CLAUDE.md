@@ -12,6 +12,9 @@ Entrega con poco tiempo: se trabaja "IA first", pero cada pieza debe tener tests
 - `docs/02-ovenbird-plataforma.md` — API, SDKs, perfil BLE v1 y sus diferencias con el acuerdo.
 - `docs/03-variante-ahorro-energia.md` — diseño de nuestra variante.
 - `docs/04-wokwi.md` — simulación (wokwi-cli/MCP, VS Code + bridge, wokwi.com).
+- `docs/05-compatibilidad-front-back.md` — referencia del Grupo 7 (el contrato vigente es docs/01).
+- `docs/06-decisiones-arquitectura.md` — **decisiones acordadas** (Supabase, Vercel, BFF con cookie,
+  versión tolerante del contrato, rutas de la variante, variables de entorno).
 
 ## Estructura
 ```

@@ -18,7 +18,14 @@ ahorro y mostrar al usuario la autonomía esperada en cada uno**.
 Extensión propia (ignorable por otros grupos): TLV `0x10` `G1_POWER_PROFILE` (L=3: `modo u8`,
 `interval_s u16`) en cada telemetría, para que nuestra unidad conozca `I` y calcule `T_offline`.
 
-## Pendiente (próxima sesión)
+## Backend y frontend (decidido el 2026-11-23)
+
+Rutas, pantalla, modelo de datos y capacidad de batería de ejemplo (**1000 mAh**, supuesto
+documentado porque no sabemos qué batería va a tener el collar): ver
+[06-decisiones-arquitectura.md §4](06-decisiones-arquitectura.md#4-variante-power-saving-back--front).
+El modo pedido se guarda en nuestra base (Ovenbird no reporta `report_interval_s`).
+
+## Pendiente (detalle técnico original)
 
 1. **Modelo de consumo** (backend, función pura + test): corriente media por modo a partir de
    corrientes de datasheet (ATmega328P activo/idle, SX1278 TX@14 dBm / RX / sleep, NEO-6M

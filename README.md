@@ -9,6 +9,7 @@
 - Plataforma Ovenbird: [docs/02-ovenbird-plataforma.md](docs/02-ovenbird-plataforma.md)
 - Variante: [docs/03-variante-ahorro-energia.md](docs/03-variante-ahorro-energia.md)
 - Simulación Wokwi: [docs/04-wokwi.md](docs/04-wokwi.md)
+- Decisiones de arquitectura: [docs/06-decisiones-arquitectura.md](docs/06-decisiones-arquitectura.md)
 - Proyectos Wokwi: _(links pendientes)_
 
 ## Inicio rápido
